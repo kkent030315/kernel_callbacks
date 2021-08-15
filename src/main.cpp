@@ -139,9 +139,9 @@ bool register_process_callback(PG_BYPASS_MODE mode, Fn notify_routine)
 
 	case Hijack:
 		pirate::init();
-		return pirate::each_process_callback([&](const CALLBACK_ROUTINE_BLOCK* block, void*)
+		return pirate::each_process_callback([&](const CALLBACK_ROUTINE_BLOCK* block, void*) -> bool
 			{
-				if (each_module([&](const PLDR_DATA_TABLE_ENTRY ldr_entry, void*)
+				if (each_module([&](const PLDR_DATA_TABLE_ENTRY ldr_entry, void*) -> bool
 					{
 						const auto start = ldr_entry->DllBase;
 						const auto end = reinterpret_cast<void*>(reinterpret_cast<u64>(ldr_entry->DllBase) + ldr_entry->SizeOfImage);
@@ -173,11 +173,15 @@ bool register_process_callback(PG_BYPASS_MODE mode, Fn notify_routine)
 
 void driver_unload(PDRIVER_OBJECT driver_object)
 {
-	for (auto i = 0; i < process_callback_count; i++)
+	for (auto i = 0ul; i < process_callback_count; i++)
 	{
 		const auto entry = &process_callback_registration[i];
+
 		if (NT_SUCCESS(PsSetCreateProcessNotifyRoutine(reinterpret_cast<PCREATE_PROCESS_NOTIFY_ROUTINE>(entry->function), TRUE)))
+		{
 			kernel_image::restore(entry->function, entry->original_bytes, entry->size_of_shellcode);
+			InterlockedDecrement(reinterpret_cast<volatile LONG*>(&process_callback_count));
+		}
 	}
 }
 

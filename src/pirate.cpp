@@ -37,8 +37,8 @@ void pirate::init()
 	{
 		PspCreateProcessNotifyRoutine = reinterpret_cast<void**>(ntoskrnl + RvaPspCreateProcessNotifyRoutine);
 
-		*(void**)(&ExReferenceCallBackBlock) = reinterpret_cast<void*>(ntoskrnl + RvaExReferenceCallBackBlock);
-		*(void**)(&ExDereferenceCallBackBlock) = reinterpret_cast<void*>(ntoskrnl + RvaExDereferenceCallBackBlock);
+		*reinterpret_cast<void**>(&ExReferenceCallBackBlock) = reinterpret_cast<void*>(ntoskrnl + RvaExReferenceCallBackBlock);
+		*reinterpret_cast<void**>(&ExDereferenceCallBackBlock) = reinterpret_cast<void*>(ntoskrnl + RvaExDereferenceCallBackBlock);
 	}
 	else
 		printk("ntoskrnl image base couldn't found\n");

@@ -70,7 +70,7 @@ bool write_to_readonly(void* dst, const void* src, const size_t size)
 exit:
 	IoFreeMdl(mdl);
 
-	return true;
+	return ret;
 }
 
 template<typename Fn>

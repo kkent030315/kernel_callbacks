@@ -1,0 +1,86 @@
+;
+; kernel_callbacks.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=kernel_callbacks.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+kernel_callbacks_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+kernel_callbacks.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%kernel_callbacks.DeviceDesc%=kernel_callbacks_Device, Root\kernel_callbacks ; TODO: edit hw-id
+
+[kernel_callbacks_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+kernel_callbacks.sys
+
+;-------------- Service installation
+[kernel_callbacks_Device.NT.Services]
+AddService = kernel_callbacks,%SPSVCINST_ASSOCSERVICE%, kernel_callbacks_Service_Inst
+
+; -------------- kernel_callbacks driver install sections
+[kernel_callbacks_Service_Inst]
+DisplayName    = %kernel_callbacks.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\kernel_callbacks.sys
+
+;
+;--- kernel_callbacks_Device Coinstaller installation ------
+;
+
+[kernel_callbacks_Device.NT.CoInstallers]
+AddReg=kernel_callbacks_Device_CoInstaller_AddReg
+CopyFiles=kernel_callbacks_Device_CoInstaller_CopyFiles
+
+[kernel_callbacks_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[kernel_callbacks_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[kernel_callbacks_Device.NT.Wdf]
+KmdfService =  kernel_callbacks, kernel_callbacks_wdfsect
+[kernel_callbacks_wdfsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="WWW.GODEYE.CLUB" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "kernel_callbacks Installation Disk"
+kernel_callbacks.DeviceDesc = "kernel_callbacks Device"
+kernel_callbacks.SVCDESC = "kernel_callbacks Service"
